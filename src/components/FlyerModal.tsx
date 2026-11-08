@@ -83,18 +83,18 @@ export const FlyerModal: React.FC<FlyerModalProps> = ({
 
             <div className="bg-gradient-to-br from-blue-950 to-slate-900 p-4 rounded-xl border border-blue-800/40">
               <span className="text-[11px] font-semibold tracking-wider uppercase text-emerald-400 block mb-1">
-                Direct Contact
+                Main Alert Line
               </span>
               <p className="text-xl font-bold text-white flex items-center gap-2 mb-2">
                 <Phone className="w-5 h-5 text-emerald-400" />
-                079 751 9840
+                {COMPANY_INFO.primaryPhone}
               </p>
               <div className="flex flex-col gap-2 pt-2">
                 <a
                   href={`tel:${COMPANY_INFO.primaryPhone.replace(/\s+/g, '')}`}
                   className="w-full py-2 px-3 text-center rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors"
                 >
-                  Call Now (079 751 9840)
+                  Call Now ({COMPANY_INFO.primaryPhone})
                 </a>
                 <a
                   href={COMPANY_INFO.whatsappUrl}

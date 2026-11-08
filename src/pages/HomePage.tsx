@@ -1,458 +1,545 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { PageId } from '../types';
-import { COMPANY_INFO, SERVICE_DIVISIONS, PILLARS } from '../data/companyData';
-import {
-  Phone,
-  MessageCircle,
-  ArrowRight,
-  ShieldCheck,
-  Lightbulb,
-  Users,
-  TrendingUp,
-  Sparkles,
-  Building2,
-  Pickaxe,
-  Coins,
-  ChevronRight,
-  FileText,
-  CheckCircle2,
-  Clock,
-  Award
+import { JPZ_INFO, TOWING_SERVICES, FLEET_VEHICLES, GALLERY_PHOTOS, SOWETO_LANDMARKS, CLIENT_REVIEWS } from '../data/jpzData';
+import { 
+  AlertTriangle, Phone, MessageSquare, Clock, ShieldCheck, 
+  MapPin, Star, Play, CheckCircle2, ChevronRight, 
+  ArrowRight, Sparkles, Navigation, X, ShieldAlert, Truck, Layers, Zap, Disc, Anchor, Compass
 } from 'lucide-react';
 
 interface HomePageProps {
-  onNavigate: (page: PageId, selectedServiceId?: string) => void;
-  onOpenFlyer: () => void;
+  onNavigate: (page: PageId, serviceId?: string) => void;
+  onOpenEmergency: () => void;
 }
 
-export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenFlyer }) => {
-  const getPillarIcon = (name: string) => {
-    switch (name) {
-      case 'Lightbulb':
-        return <Lightbulb className="w-6 h-6 text-cyan-400" />;
-      case 'ShieldCheck':
-        return <ShieldCheck className="w-6 h-6 text-emerald-400" />;
-      case 'Users':
-        return <Users className="w-6 h-6 text-blue-400" />;
-      case 'TrendingUp':
-        return <TrendingUp className="w-6 h-6 text-teal-400" />;
-      default:
-        return <Sparkles className="w-6 h-6 text-cyan-400" />;
+export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenEmergency }) => {
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [activeFleetTab, setActiveFleetTab] = useState<string>(FLEET_VEHICLES[0].id);
+
+  const getServiceIcon = (iconName: string) => {
+    switch (iconName) {
+      case 'ShieldAlert': return <ShieldAlert className="w-6 h-6 text-red-500" />;
+      case 'Truck': return <Truck className="w-6 h-6 text-yellow-500" />;
+      case 'Layers': return <Layers className="w-6 h-6 text-blue-500" />;
+      case 'Zap': return <Zap className="w-6 h-6 text-amber-500" />;
+      case 'Disc': return <Disc className="w-6 h-6 text-emerald-500" />;
+      case 'Anchor': return <Anchor className="w-6 h-6 text-purple-500" />;
+      case 'Compass': return <Compass className="w-6 h-6 text-cyan-500" />;
+      default: return <Truck className="w-6 h-6 text-yellow-500" />;
     }
   };
 
-  const getDivisionIcon = (name: string) => {
-    switch (name) {
-      case 'Pickaxe':
-        return <Pickaxe className="w-5 h-5 text-blue-600" />;
-      case 'Building2':
-        return <Building2 className="w-5 h-5 text-emerald-600" />;
-      case 'Coins':
-        return <Coins className="w-5 h-5 text-indigo-600" />;
-      case 'Sparkles':
-        return <Sparkles className="w-5 h-5 text-teal-600" />;
-      default:
-        return <Building2 className="w-5 h-5 text-blue-600" />;
-    }
-  };
+  const currentVehicle = FLEET_VEHICLES.find(v => v.id === activeFleetTab) || FLEET_VEHICLES[0];
 
   return (
-    <div className="space-y-16 sm:space-y-24 pb-16">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#061830] via-[#092244] to-[#0b2b52] text-white pt-10 sm:pt-16 pb-20 sm:pb-28">
-        {/* Ambient background effects */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-500/15 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl" />
-          <div
-            className="absolute inset-0 opacity-[0.03]"
-            style={{
-              backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
-              backgroundSize: '24px 24px',
-            }}
+    <div className="space-y-16 pb-16">
+      {/* HERO SECTION */}
+      <section className="relative min-h-[85vh] lg:min-h-[88vh] bg-slate-950 flex items-center overflow-hidden">
+        {/* Hero Background image with dramatic lighting */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src="/assets/aistudio/IMG-20261029-WA0263_744a00c7.jpg"
+            alt="JPZ Towing Blue Nissan Truck in Soweto at Sunset"
+            className="w-full h-full object-cover object-center filter brightness-[0.38] contrast-125 scale-105 transform motion-safe:animate-subtle-zoom"
           />
+          {/* Gradients */}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent" />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
-            {/* Left Column: Brand Statement & Actions */}
-            <div className="lg:col-span-7 space-y-6 sm:space-y-8">
-              {/* Brand Tagline Header */}
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur-xs text-xs font-semibold text-cyan-300">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span>TASEP ! A Spirit For Innovation</span>
-              </div>
-
-              <div className="space-y-3">
-                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] font-heading">
-                  BUILDING TODAY FOR A{' '}
-                  <span className="bg-gradient-to-r from-cyan-400 via-emerald-300 to-teal-200 bg-clip-text text-transparent">
-                    BETTER TOMORROW
-                  </span>
-                </h1>
-                <p className="text-base sm:text-lg text-slate-300 max-w-2xl leading-relaxed">
-                  TASEP PTY LTD is an integrated commercial powerhouse uniting four dynamic sectors: <strong>Mining Projects</strong>, <strong>Property Development</strong>, <strong>Strategic Financing</strong>, and <strong>Specialized Corporate Cleaning Solutions</strong>.
-                </p>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-4 pt-2">
-                <button
-                  onClick={() => onNavigate('contact')}
-                  className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-sm sm:text-base shadow-lg shadow-emerald-950/40 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
-                >
-                  <span>Request Corporate Quote</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-
-                <button
-                  onClick={() => onNavigate('services')}
-                  className="px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-semibold text-sm sm:text-base transition-all flex items-center gap-2 cursor-pointer backdrop-blur-xs"
-                >
-                  <span>Explore 4 Sectors</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Call-out contact bar */}
-              <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md max-w-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                  <span className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider block">
-                    Direct Corporate Line
-                  </span>
-                  <a
-                    href={`tel:${COMPANY_INFO.primaryPhone.replace(/\s+/g, '')}`}
-                    className="text-2xl font-black text-white hover:text-emerald-300 transition-colors flex items-center gap-2 font-heading"
-                  >
-                    <Phone className="w-5 h-5 text-emerald-400 animate-bounce" />
-                    079 751 9840
-                  </a>
-                </div>
-                <div className="flex items-center gap-2 w-full sm:w-auto">
-                  <a
-                    href={COMPANY_INFO.whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-md"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    WhatsApp
-                  </a>
-                  <button
-                    onClick={onOpenFlyer}
-                    className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-cyan-300 text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer"
-                    title="View official poster"
-                  >
-                    <FileText className="w-4 h-4" />
-                    Poster
-                  </button>
-                </div>
-              </div>
-
-              {/* Trust badges */}
-              <div className="pt-2 flex flex-wrap items-center gap-y-2 gap-x-6 text-xs text-slate-300">
-                <span className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  Zero Harm Safety Protocol
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  Turnkey EPC Capability
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  Nationwide Fleet Deployment
-                </span>
-              </div>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 w-full">
+          <div className="max-w-3xl space-y-6">
+            {/* Live Status Pill */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-600/20 border border-red-500/40 backdrop-blur-md text-red-400 text-xs sm:text-sm font-black tracking-wide uppercase">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+              </span>
+              <span>24/7 Soweto Active Response • 15–25 Min ETA</span>
             </div>
 
-            {/* Right Column: Featured Executive & Brand Visual */}
-            <div className="lg:col-span-5 relative flex justify-center">
-              <div className="relative w-full max-w-sm sm:max-w-md">
-                {/* Glowing border decoration */}
-                <div className="absolute -inset-2 bg-gradient-to-tr from-blue-600 via-cyan-400 to-emerald-500 rounded-3xl opacity-35 blur-xl" />
+            {/* Main Headline */}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.08] font-heading uppercase">
+              FASTEST TOWING & <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500">ACCIDENT RECOVERY</span> IN SOWETO
+            </h1>
 
-                <div className="relative rounded-2xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border border-white/20 overflow-hidden shadow-2xl">
-                  {/* Executive photo cropped from image 2 */}
-                  <div className="relative h-80 sm:h-96 w-full overflow-hidden bg-slate-950">
-                    <img
-                      src={COMPANY_INFO.executivePortraitUrl}
-                      alt="TASEP PTY LTD Executive Leadership"
-                      className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-90" />
-                    
-                    {/* Badge on photo */}
-                    <div className="absolute top-3 left-3 bg-[#081b33]/90 backdrop-blur-md px-3 py-1 rounded-lg border border-white/20 text-[11px] font-bold text-white flex items-center gap-1.5">
-                      <Award className="w-3.5 h-3.5 text-yellow-400" />
-                      Executive Leadership
-                    </div>
-                  </div>
+            {/* Subheading */}
+            <p className="text-base sm:text-lg lg:text-xl text-slate-300 font-normal leading-relaxed max-w-2xl">
+              Breakdown on Chris Hani Road, flat battery at Maponya Mall, or late-night accident near Bara? JPZ Towing dispatches certified recovery units immediately across all Soweto zones.
+            </p>
 
-                  {/* Caption */}
-                  <div className="p-5 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="text-base font-bold text-white font-heading">
-                          TASEP Leadership & Governance
-                        </h4>
-                        <p className="text-xs text-cyan-400 font-medium">
-                          Empowering Industrial Excellence
-                        </p>
-                      </div>
-                      <div className="w-9 h-9 rounded-xl bg-white p-1 flex items-center justify-center shrink-0">
-                        <img
-                          src={COMPANY_INFO.logoUrl}
-                          alt="TASEP Logo"
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                    </div>
-                    <p className="text-xs text-slate-300 italic pt-1 leading-relaxed">
-                      &quot;Building today for a better tomorrow is our daily commitment to every client, partner, and community across South Africa.&quot;
-                    </p>
-                  </div>
-                </div>
+            {/* Primary Action Buttons */}
+            <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
+              <button
+                onClick={onOpenEmergency}
+                className="group relative px-6 py-4 rounded-xl bg-gradient-to-r from-red-600 via-amber-500 to-red-600 hover:from-red-500 hover:via-amber-400 hover:to-red-500 text-white font-black text-base tracking-wide shadow-2xl shadow-red-600/40 flex items-center justify-center gap-2.5 transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+              >
+                <AlertTriangle className="w-5 h-5 text-yellow-200 animate-bounce" />
+                <span>REQUEST ASAP EMERGENCY TOW</span>
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+
+              <a
+                href={`tel:${JPZ_INFO.primaryPhoneRaw}`}
+                className="px-6 py-4 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black text-base flex items-center justify-center gap-2.5 shadow-xl shadow-yellow-500/20 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+              >
+                <Phone className="w-5 h-5 text-slate-950" />
+                <span>CALL: {JPZ_INFO.primaryPhone}</span>
+              </a>
+            </div>
+
+            {/* Micro-trust indicators */}
+            <div className="pt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-slate-300 text-xs">
+              <div className="flex items-center gap-2 bg-slate-900/60 backdrop-blur-md p-2.5 rounded-lg border border-slate-800">
+                <Clock className="w-4 h-4 text-yellow-400 shrink-0" />
+                <span>15-25m Avg Arrival</span>
+              </div>
+              <div className="flex items-center gap-2 bg-slate-900/60 backdrop-blur-md p-2.5 rounded-lg border border-slate-800">
+                <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>Insurance Approved</span>
+              </div>
+              <div className="flex items-center gap-2 bg-slate-900/60 backdrop-blur-md p-2.5 rounded-lg border border-slate-800">
+                <Truck className="w-4 h-4 text-blue-400 shrink-0" />
+                <span>Wheel-Lift & Rollback</span>
+              </div>
+              <div className="flex items-center gap-2 bg-slate-900/60 backdrop-blur-md p-2.5 rounded-lg border border-slate-800">
+                <MapPin className="w-4 h-4 text-red-400 shrink-0" />
+                <span>100% Soweto Coverage</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* The 4 Core Pillars Section (Extracted directly from Image 2 bottom) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
-          <span className="text-xs font-bold uppercase tracking-widest text-blue-600 block">
-            Guiding Corporate Principles
+      {/* SOWETO LANDMARKS TICKER */}
+      <section className="bg-yellow-500 text-slate-950 py-3.5 px-4 font-bold overflow-hidden shadow-md">
+        <div className="max-w-7xl mx-auto flex items-center justify-between text-xs sm:text-sm">
+          <span className="shrink-0 flex items-center gap-1.5 uppercase tracking-wider font-black">
+            <MapPin className="w-4 h-4 text-slate-950" />
+            Active Soweto Staging Hubs:
           </span>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 font-heading">
-            The 4 Pillars That Define TASEP
+          <div className="flex items-center gap-4 sm:gap-6 overflow-x-auto no-scrollbar whitespace-nowrap pl-4">
+            {SOWETO_LANDMARKS.map((lm) => (
+              <span key={lm.name} className="flex items-center gap-1.5 opacity-90 hover:opacity-100">
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-950" />
+                {lm.name} ({lm.avgEtaMins}m ETA)
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* EMERGENCY TRIAGE / COMMON CALLOUTS */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-2xl mx-auto space-y-2 mb-8">
+          <span className="text-xs font-black text-yellow-500 uppercase tracking-widest">
+            Immediate Roadside Triage
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase">
+            What is your current emergency?
           </h2>
-          <p className="text-sm sm:text-base text-slate-600">
-            Every operation across our mining, construction, capital, and cleaning divisions is anchored in four foundational commitments.
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            Click your situation to launch an instant dispatched rescue request with the right equipment.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {PILLARS.map((pillar) => (
-            <div
-              key={pillar.id}
-              className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between group hover:-translate-y-1"
-            >
-              <div className="space-y-4">
-                <div className="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
-                  {getPillarIcon(pillar.iconName)}
-                </div>
-                <div>
-                  <h3 className="text-lg font-black text-slate-900 tracking-tight font-heading">
-                    {pillar.title}
-                  </h3>
-                  <span className="text-xs font-bold text-emerald-600 tracking-wider uppercase block mt-0.5">
-                    {pillar.subtitle}
-                  </span>
-                </div>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  {pillar.description}
-                </p>
-              </div>
-
-              <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-blue-600">
-                <button
-                  onClick={() => onNavigate('about')}
-                  className="flex items-center gap-1 hover:text-blue-800 transition-colors cursor-pointer"
-                >
-                  <span>Learn more</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* The 4 Core Divisions Showcase (Extracted pictures from Image 2) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
-          <div>
-            <span className="text-xs font-bold uppercase tracking-widest text-emerald-600 block mb-1">
-              Core Capabilities
-            </span>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 font-heading">
-              Our 4 Integrated Business Divisions
-            </h2>
-            <p className="text-sm text-slate-600 mt-1 max-w-xl">
-              From heavy-tonnage open-cast mining to precision corporate hygiene, explore how our multi-disciplinary divisions solve complex challenges.
-            </p>
-          </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           <button
-            onClick={() => onNavigate('services')}
-            className="self-start md:self-auto px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 transition-colors cursor-pointer"
+            onClick={onOpenEmergency}
+            className="p-4 rounded-xl bg-white dark:bg-slate-900 border-2 border-red-500/40 hover:border-red-500 shadow-sm hover:shadow-lg transition-all text-left group cursor-pointer"
           >
-            <span>View All Detailed Specs</span>
-            <ArrowRight className="w-4 h-4" />
+            <div className="w-10 h-10 rounded-lg bg-red-500/10 text-red-500 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <ShieldAlert className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white leading-tight">
+              Vehicle Accident
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Collision, rollover, police scene clearing.
+            </p>
+            <span className="mt-3 inline-flex items-center text-xs font-black text-red-500">
+              Dispatch ASAP →
+            </span>
+          </button>
+
+          <button
+            onClick={onOpenEmergency}
+            className="p-4 rounded-xl bg-white dark:bg-slate-900 border-2 border-yellow-500/40 hover:border-yellow-500 shadow-sm hover:shadow-lg transition-all text-left group cursor-pointer"
+          >
+            <div className="w-10 h-10 rounded-lg bg-yellow-500/10 text-yellow-500 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <Truck className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white leading-tight">
+              Engine Breakdown
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Overheated, clutch dead, broken ball joint.
+            </p>
+            <span className="mt-3 inline-flex items-center text-xs font-black text-yellow-600 dark:text-yellow-400">
+              Call Wheel-Lift →
+            </span>
+          </button>
+
+          <button
+            onClick={onOpenEmergency}
+            className="p-4 rounded-xl bg-white dark:bg-slate-900 border-2 border-blue-500/40 hover:border-blue-500 shadow-sm hover:shadow-lg transition-all text-left group cursor-pointer"
+          >
+            <div className="w-10 h-10 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <Disc className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white leading-tight">
+              Puncture / Flat Tyre
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Pothole blowout, roadside wheel swap.
+            </p>
+            <span className="mt-3 inline-flex items-center text-xs font-black text-blue-600 dark:text-blue-400">
+              Request Tech →
+            </span>
+          </button>
+
+          <button
+            onClick={onOpenEmergency}
+            className="p-4 rounded-xl bg-white dark:bg-slate-900 border-2 border-emerald-500/40 hover:border-emerald-500 shadow-sm hover:shadow-lg transition-all text-left group cursor-pointer"
+          >
+            <div className="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <Zap className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white leading-tight">
+              Dead Battery / Boost
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Car won't turn over, commercial booster jump.
+            </p>
+            <span className="mt-3 inline-flex items-center text-xs font-black text-emerald-600 dark:text-emerald-400">
+              Get Jumpstart →
+            </span>
           </button>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {SERVICE_DIVISIONS.map((division, idx) => (
-            <div
-              key={division.id}
-              className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col group"
-            >
-              {/* Image banner extracted from image 2 */}
-              <div className="relative h-56 sm:h-64 w-full bg-slate-900 overflow-hidden">
-                <img
-                  src={division.image}
-                  alt={division.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
-                
-                {/* Sector Number */}
-                <div className="absolute top-4 left-4 bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-lg border border-white/20 text-xs font-bold text-white flex items-center gap-1.5">
-                  {getDivisionIcon(division.iconName)}
-                  <span>Division 0{idx + 1}</span>
-                </div>
-              </div>
-
-              {/* Body */}
-              <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors font-heading">
-                    {division.title}
-                  </h3>
-                  <p className="text-xs font-semibold text-emerald-600">
-                    {division.tagline}
-                  </p>
-                  <p className="text-sm text-slate-600 leading-relaxed pt-1">
-                    {division.summary}
-                  </p>
-                </div>
-
-                {/* Capabilities preview */}
-                <div className="pt-2">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
-                    Key Highlights:
-                  </span>
-                  <ul className="space-y-1.5">
-                    {division.capabilities.slice(0, 3).map((cap, i) => (
-                      <li key={i} className="text-xs text-slate-700 flex items-start gap-2">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-blue-500 shrink-0 mt-0.5" />
-                        <span>{cap}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Card footer CTA */}
-                <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                  <button
-                    onClick={() => onNavigate('services', division.id)}
-                    className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors cursor-pointer"
-                  >
-                    <span>Full Division Overview</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-
-                  <button
-                    onClick={() => onNavigate('contact', division.id)}
-                    className="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold text-xs transition-colors cursor-pointer"
-                  >
-                    Request Quote
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
       </section>
 
-      {/* Official Marketing Flyer Feature Strip */}
+      {/* REAL FLEET SHOWCASE & VIDEO PLAYER */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative rounded-3xl bg-gradient-to-r from-[#071930] via-[#092b47] to-[#042d2a] p-6 sm:p-10 text-white overflow-hidden shadow-xl border border-white/10">
-          <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
-            <div className="md:col-span-8 space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold">
-                <FileText className="w-3.5 h-3.5" />
-                <span>Official Marketing Collateral</span>
-              </div>
-              <h3 className="text-2xl sm:text-3xl font-extrabold font-heading">
-                Explore The Complete TASEP PTY LTD Publication
-              </h3>
-              <p className="text-sm text-slate-300 leading-relaxed max-w-2xl">
-                Inspect the authentic branded flyer containing complete vertical specifications, executive credentials, and direct contact details.
-              </p>
-              <div className="flex flex-wrap items-center gap-4 pt-2">
+        <div className="bg-slate-900 text-white rounded-3xl border-2 border-yellow-500/30 overflow-hidden shadow-2xl p-6 sm:p-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+            <div>
+              <span className="text-xs font-black text-yellow-400 uppercase tracking-widest block mb-1">
+                Authentic JPZ Fleet In Action
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight">
+                Built For Tough Township Roads & Highway Rescues
+              </h2>
+            </div>
+
+            {/* Fleet Tab Switchers */}
+            <div className="flex flex-wrap gap-2">
+              {FLEET_VEHICLES.map((vehicle) => (
                 <button
-                  onClick={onOpenFlyer}
-                  className="px-5 py-2.5 rounded-xl bg-white text-slate-900 font-bold text-xs sm:text-sm hover:bg-slate-100 transition-colors flex items-center gap-2 cursor-pointer shadow-md"
+                  key={vehicle.id}
+                  onClick={() => setActiveFleetTab(vehicle.id)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeFleetTab === vehicle.id
+                      ? 'bg-yellow-400 text-slate-950 shadow-md font-black'
+                      : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                  }`}
                 >
-                  <FileText className="w-4 h-4 text-blue-600" />
-                  <span>Inspect High-Res Publication</span>
+                  {vehicle.name.split(' (')[0]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Active Fleet Vehicle Details */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Visual media area: Video or Primary Photo */}
+            <div className="lg:col-span-7 space-y-3">
+              <div className="relative rounded-2xl overflow-hidden bg-black aspect-video border border-slate-700 shadow-xl group">
+                {currentVehicle.videoSrc ? (
+                  <video
+                    src={currentVehicle.videoSrc}
+                    controls
+                    playsInline
+                    className="w-full h-full object-cover"
+                    poster={currentVehicle.primaryImage}
+                  />
+                ) : (
+                  <img
+                    src={currentVehicle.primaryImage}
+                    alt={currentVehicle.name}
+                    className="w-full h-full object-cover"
+                  />
+                )}
+
+                <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-md px-3 py-1 rounded-md text-xs font-mono font-bold text-yellow-400 border border-yellow-400/40">
+                  {currentVehicle.plate} • {currentVehicle.callsign}
+                </div>
+              </div>
+
+              {/* Thumbnails */}
+              <div className="grid grid-cols-5 gap-2">
+                {[currentVehicle.primaryImage, ...currentVehicle.galleryImages.slice(0, 4)].map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedPhoto(img)}
+                    className="relative rounded-lg overflow-hidden aspect-video border border-slate-700 hover:border-yellow-400 transition-colors cursor-pointer"
+                  >
+                    <img src={img} alt="Fleet detail" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Vehicle Specs & Details */}
+            <div className="lg:col-span-5 space-y-4">
+              <div className="inline-block px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/30 text-yellow-400 text-xs font-bold uppercase">
+                {currentVehicle.type}
+              </div>
+
+              <h3 className="text-xl sm:text-2xl font-black text-white leading-snug">
+                {currentVehicle.name}
+              </h3>
+
+              <p className="text-sm text-slate-300 leading-relaxed">
+                {currentVehicle.description}
+              </p>
+
+              {/* Spec list */}
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700">
+                  <span className="text-[11px] text-slate-400 block">Tow Capacity</span>
+                  <span className="text-sm font-bold text-yellow-400">{currentVehicle.specs.capacity}</span>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700">
+                  <span className="text-[11px] text-slate-400 block">Winch Power</span>
+                  <span className="text-sm font-bold text-yellow-400">{currentVehicle.specs.winchRating}</span>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700 col-span-2">
+                  <span className="text-[11px] text-slate-400 block">Specialty Deployment</span>
+                  <span className="text-xs font-semibold text-slate-200">{currentVehicle.specs.specialty}</span>
+                </div>
+              </div>
+
+              <div className="pt-2 flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={onOpenEmergency}
+                  className="flex-1 py-3 px-4 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black text-sm flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md"
+                >
+                  <AlertTriangle className="w-4 h-4 text-slate-950" />
+                  Dispatch This Rig
                 </button>
                 <a
-                  href={`tel:${COMPANY_INFO.primaryPhone.replace(/\s+/g, '')}`}
-                  className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm transition-colors flex items-center gap-2"
+                  href={`tel:${JPZ_INFO.primaryPhoneRaw}`}
+                  className="py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm flex items-center justify-center gap-2 border border-slate-700"
                 >
-                  <Phone className="w-4 h-4" />
-                  <span>Call {COMPANY_INFO.primaryPhone}</span>
+                  <Phone className="w-4 h-4 text-yellow-400" />
+                  Direct Line
                 </a>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
 
-            <div className="md:col-span-4 flex justify-center">
-              <button
-                onClick={onOpenFlyer}
-                className="relative group cursor-pointer block rounded-xl overflow-hidden shadow-2xl border-2 border-white/20 hover:scale-105 transition-transform"
-                title="Click to zoom in"
-              >
+      {/* CORE TOWING SERVICES GRID */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
+          <div>
+            <span className="text-xs font-black text-yellow-500 uppercase tracking-widest">
+              Comprehensive Roadside Solutions
+            </span>
+            <h2 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
+              Services We Provide 24/7
+            </h2>
+          </div>
+          <button
+            onClick={() => onNavigate('services')}
+            className="inline-flex items-center gap-1.5 text-sm font-bold text-yellow-600 dark:text-yellow-400 hover:underline cursor-pointer"
+          >
+            <span>View All Detailed Specs</span>
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {TOWING_SERVICES.slice(0, 8).map((srv) => (
+            <div
+              key={srv.id}
+              className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-200 flex flex-col group"
+            >
+              <div className="relative h-44 overflow-hidden bg-slate-800">
                 <img
-                  src={COMPANY_INFO.flyerUrl}
-                  alt="TASEP Flyer Preview"
-                  className="w-48 sm:w-56 h-auto object-cover rounded-lg"
+                  src={srv.image}
+                  alt={srv.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
-                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                  <span className="px-3 py-1.5 rounded-lg bg-black/70 backdrop-blur-md text-white text-xs font-semibold flex items-center gap-1.5">
-                    Click to Zoom
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+                <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-white text-xs font-bold">
+                  <span className="bg-black/60 px-2 py-0.5 rounded backdrop-blur-xs">
+                    {srv.etaEstimate}
                   </span>
                 </div>
-              </button>
+              </div>
+
+              <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800">
+                      {getServiceIcon(srv.iconName)}
+                    </div>
+                    <h3 className="font-extrabold text-base text-slate-900 dark:text-white leading-tight">
+                      {srv.shortTitle}
+                    </h3>
+                  </div>
+
+                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-3">
+                    {srv.summary}
+                  </p>
+                </div>
+
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <button
+                    onClick={() => onNavigate('services', srv.id)}
+                    className="text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-yellow-500 flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>Details</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
+                    onClick={onOpenEmergency}
+                    className="px-2.5 py-1 rounded bg-yellow-400 hover:bg-yellow-300 text-slate-950 text-xs font-black cursor-pointer shadow-xs"
+                  >
+                    Dispatch Now
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* REAL RECOVERY PHOTO GALLERY */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-2xl mx-auto space-y-2 mb-10">
+          <span className="text-xs font-black text-yellow-500 uppercase tracking-widest">
+            On The Ground In Soweto
+          </span>
+          <h2 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
+            Real Scene Recovery Gallery
+          </h2>
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            Real photos from our daily operations—clearing accidents, winching cars from embankments, and transporting vehicles safely.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+          {GALLERY_PHOTOS.map((photo, idx) => (
+            <div
+              key={idx}
+              onClick={() => setSelectedPhoto(photo.src)}
+              className="group relative rounded-xl overflow-hidden aspect-4/3 bg-slate-900 cursor-pointer shadow-md hover:shadow-xl transition-all"
+            >
+              <img
+                src={photo.src}
+                alt={photo.caption}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute bottom-2.5 left-2.5 right-2.5">
+                <span className="inline-block text-[10px] font-mono px-1.5 py-0.5 rounded bg-yellow-400 text-slate-950 font-bold mb-1">
+                  {photo.category}
+                </span>
+                <p className="text-xs font-semibold text-white leading-snug line-clamp-2">
+                  {photo.caption}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* VERIFIED WHATSAPP TESTIMONIAL & TRUST */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-gradient-to-br from-slate-900 via-slate-950 to-neutral-900 rounded-3xl p-6 sm:p-10 border border-yellow-500/30 shadow-2xl">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* WhatsApp Real Encounter Highlight */}
+            <div className="lg:col-span-5 space-y-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold">
+                <MessageSquare className="w-4 h-4" />
+                <span>Verified Soweto WhatsApp Encounter</span>
+              </div>
+
+              <h3 className="text-2xl font-black text-white">
+                "Do u know pimville square? We can meetup there..."
+              </h3>
+
+              <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-800 text-sm space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-yellow-400 text-slate-950 font-black flex items-center justify-center">
+                    SK
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-white">Samke & Friend</h4>
+                    <span className="text-xs text-yellow-400">Pimville Square, Soweto</span>
+                  </div>
+                </div>
+                <p className="text-xs sm:text-sm text-slate-300 italic">
+                  "I just called them samke and luckily I know him don't worry... Pulled up in 15 minutes with the blue Nissan truck. Handled the breakdown without stress!"
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 text-xs text-slate-400">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <span>Known, trusted & respected across Soweto</span>
+              </div>
+            </div>
+
+            {/* Other Reviews */}
+            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {CLIENT_REVIEWS.filter(r => r.id !== 'rev-samke').map((review) => (
+                <div key={review.id} className="p-4 rounded-xl bg-slate-800/70 border border-slate-700/80 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-sm text-white">{review.author}</span>
+                    <div className="flex text-yellow-400">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-3.5 h-3.5 fill-yellow-400" />
+                      ))}
+                    </div>
+                  </div>
+                  <span className="text-[11px] text-yellow-400 font-semibold block">
+                    {review.suburb} • {review.service}
+                  </span>
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    "{review.comment}"
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Quick Consultation CTA Strip */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-2xl border border-slate-200 p-8 sm:p-10 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-2 text-center md:text-left">
-            <h3 className="text-xl sm:text-2xl font-black text-slate-900 font-heading">
-              Ready to Partner on Your Next High-Impact Venture?
-            </h3>
-            <p className="text-sm text-slate-600 max-w-2xl">
-              Whether you need heavy excavation equipment, property development oversight, strategic capital financing, or corporate facility cleaning, our directors are ready.
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full sm:w-auto">
+      {/* FULL PHOTO INSPECTION LIGHTBOX */}
+      {selectedPhoto && (
+        <div 
+          onClick={() => setSelectedPhoto(null)}
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div className="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
             <button
-              onClick={() => onNavigate('contact')}
-              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition-colors cursor-pointer text-center"
+              onClick={() => setSelectedPhoto(null)}
+              className="absolute -top-10 right-0 p-1.5 rounded-full bg-slate-800 text-white hover:bg-slate-700"
             >
-              Go to Contact Forms
+              <X className="w-6 h-6" />
             </button>
-            <a
-              href={COMPANY_INFO.whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full sm:w-auto px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm transition-colors flex items-center justify-center gap-2"
-            >
-              <MessageCircle className="w-4 h-4" />
-              <span>Quick WhatsApp</span>
-            </a>
+            <img
+              src={selectedPhoto}
+              alt="Inspected JPZ Photo"
+              className="max-h-[80vh] w-auto object-contain rounded-xl border border-yellow-500/40 shadow-2xl"
+            />
           </div>
         </div>
-      </section>
+      )}
     </div>
   );
 };

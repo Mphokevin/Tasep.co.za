@@ -6,14 +6,16 @@ export const COMPANY_INFO = {
   registration: 'Reg. No. 2021/849204/07',
   slogan: 'TASEP ! A Spirit For Innovation',
   tagline: 'BUILDING TODAY FOR A BETTER TOMORROW',
-  primaryPhone: '079 751 9840',
-  internationalPhone: '+27 79 751 9840',
-  whatsappUrl: 'https://wa.me/27797519840?text=Hello%20TASEP%20PTY%20LTD,%20I%20would%20like%20to%20inquire%20about%20your%20services.',
+  primaryPhone: '+27 81 079 8244',
+  localPhone: '081 079 8244',
+  internationalPhone: '+27 81 079 8244',
+  mainAlertNumber: '+27 81 079 8244',
+  whatsappUrl: 'https://wa.me/27810798244?text=Hello%20TASEP%20PTY%20LTD,%20I%20would%20like%20to%20inquire%20about%20your%20services.',
   email: 'info@tasep.co.za',
   headquarters: 'Gauteng & Nationwide Operations, South Africa',
   address: 'Commercial Hub, Sandton / Johannesburg, Gauteng, South Africa',
   businessHours: 'Monday – Friday: 08:00 – 17:00 | Saturday: 08:30 – 13:00',
-  emergencyLine: '24/7 Rapid Response for Mining & Industrial Facilities',
+  emergencyLine: '24/7 Rapid Response & Alert Desk for Mining, Property & Industrial Facilities',
   logoUrl: '/assets/aistudio/IMG-20261028-WA0077_846089b4.jpg',
   flyerUrl: '/assets/aistudio/file_00000000b9c4820897699db2924a0c10_650e2f19.png',
   executivePortraitUrl: '/assets/extracted/executive_portrait.jpg',
@@ -165,7 +167,7 @@ export const FAQS = [
   },
   {
     q: 'How can I request a project proposal or quotation?',
-    a: 'You can submit an inquiry through our integrated contact forms on Page 4, call us directly at 079 751 9840, or click our instant WhatsApp link to connect with our corporate liaison immediately.'
+    a: 'You can submit an inquiry through our integrated contact forms on Page 4, call our main alert desk directly at +27 81 079 8244, or click our instant WhatsApp link to connect with our corporate liaison immediately.'
   },
   {
     q: 'Does TASEP undertake joint ventures or turnkey partnerships?',

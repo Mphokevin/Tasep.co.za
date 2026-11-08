@@ -1,784 +1,485 @@
 import React, { useState } from 'react';
-import { COMPANY_INFO, SERVICE_DIVISIONS, FAQS } from '../data/companyData';
-import { ContactFormData, SubmittedInquiry } from '../types';
-import {
-  Phone,
-  MessageCircle,
-  Mail,
-  MapPin,
-  Clock,
-  Send,
-  CheckCircle2,
-  Copy,
-  Check,
-  FileCheck,
-  Sparkles,
-  Building2,
-  Pickaxe,
-  Coins,
-  ChevronDown,
-  Calendar,
-  AlertCircle
+import { PageId, ServiceCategory, StandardBookingInquiry } from '../types';
+import { JPZ_INFO, SOWETO_LANDMARKS, TOWING_SERVICES, FAQS } from '../data/jpzData';
+import { 
+  Phone, Mail, MapPin, MessageSquare, Clock, 
+  ShieldCheck, AlertTriangle, CheckCircle2, Send, 
+  HelpCircle, ChevronDown, ChevronUp, Navigation
 } from 'lucide-react';
+import { ServiceAreaMap } from '../components/ServiceAreaMap';
 
 interface ContactPageProps {
+  onOpenEmergency: () => void;
   preselectedServiceId?: string;
 }
 
 export const ContactPage: React.FC<ContactPageProps> = ({
-  preselectedServiceId
+  onOpenEmergency,
+  preselectedServiceId,
 }) => {
-  const [formType, setFormType] = useState<'quote' | 'general' | 'callback'>(
-    preselectedServiceId ? 'quote' : 'quote'
+  // Booking Form State
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [pickup, setPickup] = useState('');
+  const [dropoff, setDropoff] = useState('');
+  const [serviceType, setServiceType] = useState<ServiceCategory>(
+    (preselectedServiceId as ServiceCategory) || 'breakdown-towing'
   );
+  const [vehicleDetails, setVehicleDetails] = useState('');
+  const [preferredDate, setPreferredDate] = useState('');
+  const [preferredTime, setPreferredTime] = useState('');
+  const [urgency, setUrgency] = useState<'immediate' | 'today' | 'scheduled'>('immediate');
+  const [specialInstructions, setSpecialInstructions] = useState('');
 
-  const [formData, setFormData] = useState<ContactFormData>({
-    fullName: '',
-    email: '',
-    phone: '',
-    company: '',
-    serviceCategory: preselectedServiceId || 'mining-projects',
-    projectLocation: '',
-    estimatedBudget: 'R500k - R2M',
-    timeline: 'Immediate (1-30 days)',
-    message: '',
-    formType: 'quote',
-    callbackDate: '',
-    callbackTime: 'Morning (09:00 - 12:00)'
-  });
+  // Submission state
+  const [submittedBooking, setSubmittedBooking] = useState<StandardBookingInquiry | null>(null);
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submittedInquiry, setSubmittedInquiry] = useState<SubmittedInquiry | null>(null);
-  const [copiedPhone, setCopiedPhone] = useState(false);
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  // Quick Callback State
+  const [cbName, setCbName] = useState('');
+  const [cbPhone, setCbPhone] = useState('');
+  const [cbSubmitted, setCbSubmitted] = useState(false);
 
-  const handleCopyPhone = () => {
-    navigator.clipboard.writeText(COMPANY_INFO.primaryPhone);
-    setCopiedPhone(true);
-    setTimeout(() => setCopiedPhone(false), 2500);
-  };
+  // FAQ Accordion State
+  const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(0);
 
-  const validate = () => {
-    const newErrors: Record<string, string> = {};
-    if (!formData.fullName.trim()) newErrors.fullName = 'Full Name is required';
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email address is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
-    }
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone number is required';
-    }
-    if (!formData.message.trim()) {
-      newErrors.message = 'Please provide brief details of your request';
-    }
-    if (formType === 'callback' && !formData.callbackDate) {
-      newErrors.callbackDate = 'Please select a preferred callback date';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
-
-    setIsSubmitting(true);
-    setTimeout(() => {
-      const refNumber = `TSP-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
-      const inquiry: SubmittedInquiry = {
-        ...formData,
-        formType,
-        id: refNumber,
-        submittedAt: new Date().toLocaleString()
-      };
-      setSubmittedInquiry(inquiry);
-      setIsSubmitting(false);
-    }, 700);
+    const newBooking: StandardBookingInquiry = {
+      id: `JPZ-BOOK-${Math.floor(100000 + Math.random() * 900000)}`,
+      fullName,
+      phone,
+      email: email || undefined,
+      pickupLocation: pickup,
+      dropoffLocation: dropoff,
+      serviceType,
+      vehicleDetails: vehicleDetails || 'Standard Vehicle',
+      preferredDate,
+      preferredTime,
+      urgency,
+      specialInstructions,
+      createdAt: new Date().toLocaleDateString()
+    };
+    setSubmittedBooking(newBooking);
   };
 
-  const getWhatsAppPrefilledUrl = (inquiry: SubmittedInquiry) => {
-    const text = encodeURIComponent(
-      `Hello TASEP PTY LTD! My name is ${inquiry.fullName} from ${
-        inquiry.company || 'Private Client'
-      }. Reference: ${inquiry.id}. I submitted an inquiry for ${
-        inquiry.serviceCategory
-      }: "${inquiry.message}". Please review!`
-    );
-    return `https://wa.me/27797519840?text=${text}`;
+  const handleCallbackSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCbSubmitted(true);
   };
 
   return (
-    <div className="space-y-12 sm:space-y-16 pb-20">
-      {/* Top Banner */}
-      <section className="bg-gradient-to-r from-[#061830] via-[#092244] to-[#04282e] text-white py-12 sm:py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold">
-            <Phone className="w-3.5 h-3.5" />
-            <span>Integrated Communication Hub</span>
+    <div className="space-y-16 py-8 pb-20">
+      {/* Top Header */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-10 border border-yellow-500/30 shadow-2xl relative overflow-hidden">
+          <div className="relative z-10 max-w-2xl space-y-3">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/30 text-yellow-400 text-xs font-black uppercase tracking-wider">
+              24/7 Soweto Dispatch Centre
+            </span>
+            <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight">
+              Contact JPZ Towing & Bookings
+            </h1>
+            <p className="text-sm sm:text-base text-slate-300">
+              Immediate breakdown assistance, scheduled inter-provincial towing, or insurance quotations. Our operators are standing by 24 hours a day.
+            </p>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight font-heading">
-            Connect With TASEP PTY LTD
-          </h1>
-          <p className="text-base sm:text-lg text-slate-300 max-w-3xl leading-relaxed">
-            Our corporate offices and field directors are ready to assist. Submit a detailed quotation request, schedule an executive callback, or reach out instantly via telephone and WhatsApp.
-          </p>
+
+          {/* Stranded Right Now Warning Strip */}
+          <div className="mt-6 p-4 rounded-2xl bg-red-950/80 border border-red-500/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+              </span>
+              <div>
+                <p className="text-xs font-bold text-yellow-300 uppercase">Stranded on the road right this moment?</p>
+                <p className="text-sm font-black text-white">Don't wait for email or standard forms!</p>
+              </div>
+            </div>
+
+            <button
+              onClick={onOpenEmergency}
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-500 text-white font-black text-xs uppercase tracking-wide flex items-center justify-center gap-2 shadow-lg shadow-red-900/40 cursor-pointer animate-pulse"
+            >
+              <AlertTriangle className="w-4 h-4 text-yellow-200" />
+              <span>Launch ASAP Emergency Form</span>
+            </button>
+          </div>
         </div>
       </section>
 
-      {/* Prominent Flyer Banner Replica (079 751 9840) */}
+      {/* Main Forms & Contact Info Grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative rounded-3xl bg-gradient-to-r from-[#0a2342] via-[#0d3b66] to-[#085f63] text-white p-6 sm:p-10 shadow-2xl border-2 border-emerald-500/30 overflow-hidden">
-          {/* Subtle background glow */}
-          <div className="absolute -top-12 -right-12 w-64 h-64 bg-emerald-400/20 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
-            {/* Phone Callout Badge extracted from Image 2 */}
-            <div className="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
-              <div className="relative">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-xl shadow-emerald-900/50 border-4 border-white/20 animate-pulse">
-                  <Phone className="w-10 h-10 sm:w-12 sm:h-12" />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          {/* Left Column: Integrated Booking & Quote Form */}
+          <div className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-xl">
+            {submittedBooking ? (
+              <div className="text-center py-8 space-y-4">
+                <div className="w-16 h-16 mx-auto rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center">
+                  <CheckCircle2 className="w-10 h-10" />
                 </div>
-              </div>
-
-              <div className="space-y-1">
-                <span className="text-xs sm:text-sm font-extrabold tracking-widest uppercase text-emerald-300 block">
-                  CONTACT US NOW
-                </span>
-                <a
-                  href={`tel:${COMPANY_INFO.primaryPhone.replace(/\s+/g, '')}`}
-                  className="text-3xl sm:text-5xl font-black text-white hover:text-emerald-300 transition-colors tracking-tight font-heading block"
-                >
-                  {COMPANY_INFO.primaryPhone}
-                </a>
-                <p className="text-xs text-slate-300">
-                  {COMPANY_INFO.emergencyLine}
+                <h3 className="text-2xl font-black text-slate-900 dark:text-white">
+                  Booking Request Received!
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-300 max-w-md mx-auto">
+                  Reference: <span className="font-mono text-yellow-500 font-bold">{submittedBooking.id}</span>. Our Soweto dispatch controller is reviewing your route and will contact you at <strong className="text-slate-900 dark:text-white">{submittedBooking.phone}</strong> shortly.
                 </p>
-              </div>
-            </div>
 
-            {/* Quick Action Buttons */}
-            <div className="flex flex-wrap items-center justify-center gap-3 w-full lg:w-auto">
-              <a
-                href={`tel:${COMPANY_INFO.primaryPhone.replace(/\s+/g, '')}`}
-                className="px-6 py-3.5 rounded-xl bg-white text-slate-900 font-extrabold text-sm hover:bg-slate-100 transition-colors flex items-center gap-2 shadow-lg"
-              >
-                <Phone className="w-4 h-4 text-emerald-600" />
-                <span>Call Directly</span>
-              </a>
-
-              <a
-                href={COMPANY_INFO.whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-sm transition-colors flex items-center gap-2 shadow-lg"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span>Open WhatsApp</span>
-              </a>
-
-              <button
-                onClick={handleCopyPhone}
-                className="px-4 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold text-xs sm:text-sm transition-colors flex items-center gap-2 cursor-pointer backdrop-blur-xs"
-              >
-                {copiedPhone ? (
-                  <>
-                    <Check className="w-4 h-4 text-emerald-400" />
-                    <span>Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4" />
-                    <span>Copy Number</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Main Integrated Form & Contact Details Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-          {/* Left Column: Integrated Contact Form */}
-          <div className="lg:col-span-8 bg-white rounded-3xl border border-slate-200/90 shadow-md p-6 sm:p-10 space-y-8">
-            {/* Form Mode Selector */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h2 className="text-2xl font-black text-slate-900 font-heading">
-                    Integrated Contact Portal
-                  </h2>
-                  <p className="text-xs sm:text-sm text-slate-500">
-                    Select your communication type below for expedited routing
-                  </p>
-                </div>
-                <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 p-1 hidden sm:flex items-center justify-center">
-                  <img
-                    src={COMPANY_INFO.logoUrl}
-                    alt="Logo"
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              </div>
-
-              {/* Segmented Mode Tabs */}
-              <div className="grid grid-cols-3 gap-1.5 p-1.5 bg-slate-100 rounded-xl">
-                <button
-                  type="button"
-                  onClick={() => setFormType('quote')}
-                  className={`py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-                    formType === 'quote'
-                      ? 'bg-white text-slate-900 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  Request Quote
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormType('general')}
-                  className={`py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-                    formType === 'general'
-                      ? 'bg-white text-slate-900 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  General Message
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormType('callback')}
-                  className={`py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-                    formType === 'callback'
-                      ? 'bg-white text-slate-900 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  Schedule Call
-                </button>
-              </div>
-            </div>
-
-            {/* Submission Success Confirmation Modal / Card */}
-            {submittedInquiry ? (
-              <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-6 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-300">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-md">
-                    <CheckCircle2 className="w-6 h-6" />
-                  </div>
-                  <div className="space-y-1">
-                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">
-                      Inquiry Successfully Dispatched
-                    </span>
-                    <h3 className="text-xl font-bold text-slate-900 font-heading">
-                      Thank You, {submittedInquiry.fullName}!
-                    </h3>
-                    <p className="text-xs text-slate-600">
-                      Our commercial operations desk has received your submission and will get back to you shortly.
-                    </p>
-                  </div>
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 text-left text-xs space-y-2 max-w-md mx-auto border border-slate-200 dark:border-slate-700">
+                  <p><strong>Route:</strong> {submittedBooking.pickupLocation} → {submittedBooking.dropoffLocation}</p>
+                  <p><strong>Service:</strong> {submittedBooking.serviceType.replace('-', ' ')}</p>
+                  <p><strong>Vehicle:</strong> {submittedBooking.vehicleDetails}</p>
                 </div>
 
-                {/* Reference Slip */}
-                <div className="bg-white rounded-xl p-4 border border-emerald-100 shadow-xs space-y-3 text-xs">
-                  <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                    <span className="text-slate-500">Reference Number:</span>
-                    <span className="font-mono font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded">
-                      {submittedInquiry.id}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                    <span className="text-slate-500">Selected Division:</span>
-                    <span className="font-semibold text-slate-800 capitalize">
-                      {submittedInquiry.serviceCategory.replace('-', ' ')}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                    <span className="text-slate-500">Contact Telephone:</span>
-                    <span className="font-semibold text-slate-800">
-                      {submittedInquiry.phone}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-500">Dispatched At:</span>
-                    <span className="text-slate-600">{submittedInquiry.submittedAt}</span>
-                  </div>
-                </div>
-
-                {/* Instant Actions */}
-                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
                   <a
-                    href={getWhatsAppPrefilledUrl(submittedInquiry)}
+                    href={`https://wa.me/27810798244?text=Hi%20JPZ%2C%20I%20just%20submitted%20booking%20${submittedBooking.id}%20for%20pickup%20at%20${encodeURIComponent(submittedBooking.pickupLocation)}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm transition-colors flex items-center justify-center gap-2 shadow-sm"
+                    className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2"
                   >
-                    <MessageCircle className="w-4 h-4" />
-                    <span>Send Reference via WhatsApp</span>
+                    <MessageSquare className="w-4 h-4" />
+                    Notify Driver on WhatsApp
                   </a>
-
                   <button
-                    onClick={() => {
-                      setSubmittedInquiry(null);
-                      setFormData({
-                        fullName: '',
-                        email: '',
-                        phone: '',
-                        company: '',
-                        serviceCategory: 'mining-projects',
-                        projectLocation: '',
-                        estimatedBudget: 'R500k - R2M',
-                        timeline: 'Immediate (1-30 days)',
-                        message: '',
-                        formType: 'quote',
-                        callbackDate: '',
-                        callbackTime: 'Morning (09:00 - 12:00)'
-                      });
-                    }}
-                    className="py-3 px-4 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs sm:text-sm border border-slate-200 transition-colors"
+                    onClick={() => setSubmittedBooking(null)}
+                    className="px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold"
                   >
-                    Submit Another Inquiry
+                    Submit Another Booking
                   </button>
                 </div>
               </div>
             ) : (
-              /* Actual Form Elements */
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Full Name & Company */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 block">
-                      Full Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Sipho Ndlovu"
-                      value={formData.fullName}
-                      onChange={(e) =>
-                        setFormData({ ...formData, fullName: e.target.value })
-                      }
-                      className={`w-full px-3.5 py-2.5 rounded-xl border text-sm text-slate-800 focus:outline-none focus:ring-2 transition-all ${
-                        errors.fullName
-                          ? 'border-red-400 focus:ring-red-300 bg-red-50/30'
-                          : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-600 bg-white'
-                      }`}
-                    />
-                    {errors.fullName && (
-                      <span className="text-[11px] text-red-500 flex items-center gap-1">
-                        <AlertCircle className="w-3 h-3" />
-                        {errors.fullName}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 block">
-                      Company / Organization
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Anglo Infra / Private"
-                      value={formData.company}
-                      onChange={(e) =>
-                        setFormData({ ...formData, company: e.target.value })
-                      }
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 bg-white"
-                    />
-                  </div>
+              <form onSubmit={handleBookingSubmit} className="space-y-4">
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                    Towing & Vehicle Transport Form
+                  </h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Book ahead or request an official corporate towing quotation across Soweto and Gauteng.
+                  </p>
                 </div>
 
-                {/* Email & Phone */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 block">
-                      Email Address <span className="text-red-500">*</span>
+                {/* Name & Phone */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      Full Name *
                     </label>
                     <input
-                      type="email"
-                      placeholder="e.g. sipho@example.com"
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                      className={`w-full px-3.5 py-2.5 rounded-xl border text-sm text-slate-800 focus:outline-none focus:ring-2 transition-all ${
-                        errors.email
-                          ? 'border-red-400 focus:ring-red-300 bg-red-50/30'
-                          : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-600 bg-white'
-                      }`}
+                      type="text"
+                      required
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="e.g. Sipho Ndlovu"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-yellow-500"
                     />
-                    {errors.email && (
-                      <span className="text-[11px] text-red-500 flex items-center gap-1">
-                        <AlertCircle className="w-3 h-3" />
-                        {errors.email}
-                      </span>
-                    )}
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 block">
-                      Telephone / Mobile <span className="text-red-500">*</span>
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      Contact Phone Number *
                     </label>
                     <input
                       type="tel"
-                      placeholder="e.g. 079 751 9840 / +27..."
-                      value={formData.phone}
-                      onChange={(e) =>
-                        setFormData({ ...formData, phone: e.target.value })
-                      }
-                      className={`w-full px-3.5 py-2.5 rounded-xl border text-sm text-slate-800 focus:outline-none focus:ring-2 transition-all ${
-                        errors.phone
-                          ? 'border-red-400 focus:ring-red-300 bg-red-50/30'
-                          : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-600 bg-white'
-                      }`}
+                      required
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="e.g. 081 079 8244"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-yellow-500"
                     />
-                    {errors.phone && (
-                      <span className="text-[11px] text-red-500 flex items-center gap-1">
-                        <AlertCircle className="w-3 h-3" />
-                        {errors.phone}
-                      </span>
-                    )}
                   </div>
                 </div>
 
-                {/* Division Category Selector */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 block">
-                    Core Division of Interest <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={formData.serviceCategory}
-                    onChange={(e) =>
-                      setFormData({ ...formData, serviceCategory: e.target.value })
-                    }
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
-                  >
-                    {SERVICE_DIVISIONS.map((div) => (
-                      <option key={div.id} value={div.id}>
-                        {div.title} ({div.shortTitle})
-                      </option>
-                    ))}
-                    <option value="multiple">Multiple Divisions / Turnkey Package</option>
-                  </select>
+                {/* Email & Urgency */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      Email Address (Optional)
+                    </label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="name@example.com"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-yellow-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      Dispatch Urgency
+                    </label>
+                    <select
+                      value={urgency}
+                      onChange={(e) => setUrgency(e.target.value as any)}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-yellow-500"
+                    >
+                      <option value="immediate">Immediate Dispatch (15-25 min target)</option>
+                      <option value="today">Later Today</option>
+                      <option value="scheduled">Scheduled Date & Time Ahead</option>
+                    </select>
+                  </div>
                 </div>
 
-                {/* Specific Fields for Quote Request */}
-                {formType === 'quote' && (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-700 block">
-                        Project Site / Location
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Sandton, Witbank, Polokwane"
-                        value={formData.projectLocation}
-                        onChange={(e) =>
-                          setFormData({ ...formData, projectLocation: e.target.value })
-                        }
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-700 block">
-                        Estimated Budget Bracket
-                      </label>
-                      <select
-                        value={formData.estimatedBudget}
-                        onChange={(e) =>
-                          setFormData({ ...formData, estimatedBudget: e.target.value })
-                        }
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                      >
-                        <option value="Under R250k">Under R250,000</option>
-                        <option value="R250k - R1M">R250,000 – R1 Million</option>
-                        <option value="R1M - R5M">R1 Million – R5 Million</option>
-                        <option value="R5M - R20M">R5 Million – R20 Million</option>
-                        <option value="R20M+">R20 Million+ (Major Turnkey)</option>
-                      </select>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-700 block">
-                        Project Timeline
-                      </label>
-                      <select
-                        value={formData.timeline}
-                        onChange={(e) =>
-                          setFormData({ ...formData, timeline: e.target.value })
-                        }
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                      >
-                        <option value="Immediate (1-30 days)">Immediate (1–30 days)</option>
-                        <option value="1-3 Months">1 – 3 Months</option>
-                        <option value="3-6 Months">3 – 6 Months</option>
-                        <option value="Long Term Tender">Long Term Tender / Pipeline</option>
-                      </select>
-                    </div>
+                {/* Pickup & Dropoff */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      Pickup Location / Suburb *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={pickup}
+                      onChange={(e) => setPickup(e.target.value)}
+                      placeholder="e.g. Pimville Square / Chris Hani Rd"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-yellow-500"
+                    />
                   </div>
-                )}
 
-                {/* Specific Fields for Callback */}
-                {formType === 'callback' && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-700 block">
-                        Preferred Callback Date <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="date"
-                        value={formData.callbackDate}
-                        onChange={(e) =>
-                          setFormData({ ...formData, callbackDate: e.target.value })
-                        }
-                        className={`w-full px-3.5 py-2.5 rounded-xl border text-sm text-slate-800 bg-white focus:outline-none focus:ring-2 ${
-                          errors.callbackDate ? 'border-red-400' : 'border-slate-200'
-                        }`}
-                      />
-                      {errors.callbackDate && (
-                        <span className="text-[11px] text-red-500 block">
-                          {errors.callbackDate}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-700 block">
-                        Preferred Time Slot
-                      </label>
-                      <select
-                        value={formData.callbackTime}
-                        onChange={(e) =>
-                          setFormData({ ...formData, callbackTime: e.target.value })
-                        }
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 bg-white focus:outline-none focus:ring-2"
-                      >
-                        <option value="Morning (08:30 - 11:30)">Morning (08:30 – 11:30)</option>
-                        <option value="Midday (11:30 - 14:30)">Midday (11:30 – 14:30)</option>
-                        <option value="Afternoon (14:30 - 17:00)">Afternoon (14:30 – 17:00)</option>
-                      </select>
-                    </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      Dropoff Destination *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={dropoff}
+                      onChange={(e) => setDropoff(e.target.value)}
+                      placeholder="e.g. Dealership / Home / Panel Shop"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-yellow-500"
+                    />
                   </div>
-                )}
+                </div>
 
-                {/* Project Details / Message */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 block">
-                    Detailed Scope or Message <span className="text-red-500">*</span>
+                {/* Service Category & Vehicle Info */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      Service Category
+                    </label>
+                    <select
+                      value={serviceType}
+                      onChange={(e) => setServiceType(e.target.value as ServiceCategory)}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-yellow-500"
+                    >
+                      {TOWING_SERVICES.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      Vehicle Make, Model & Reg
+                    </label>
+                    <input
+                      type="text"
+                      value={vehicleDetails}
+                      onChange={(e) => setVehicleDetails(e.target.value)}
+                      placeholder="e.g. 2021 Silver Toyota Hilux (011 JPZ GP)"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-yellow-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Special Instructions */}
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                    Special Instructions (Keys status, flat tyre, accident details)
                   </label>
                   <textarea
-                    rows={4}
-                    placeholder="Describe your site parameters, tonnage, square meters, capital needs, or cleaning frequency..."
-                    value={formData.message}
-                    onChange={(e) =>
-                      setFormData({ ...formData, message: e.target.value })
-                    }
-                    className={`w-full px-3.5 py-2.5 rounded-xl border text-sm text-slate-800 focus:outline-none focus:ring-2 transition-all ${
-                      errors.message
-                        ? 'border-red-400 focus:ring-red-300 bg-red-50/30'
-                        : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-600 bg-white'
-                    }`}
+                    rows={3}
+                    value={specialInstructions}
+                    onChange={(e) => setSpecialInstructions(e.target.value)}
+                    placeholder="Provide any gate codes, specific workshop drop off bays, or condition notes..."
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl p-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-yellow-500"
                   />
-                  {errors.message && (
-                    <span className="text-[11px] text-red-500 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.message}
-                    </span>
-                  )}
                 </div>
 
-                {/* Submit Button */}
-                <div className="pt-2">
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-blue-600 via-emerald-600 to-teal-600 hover:from-blue-700 hover:via-emerald-700 hover:to-teal-700 text-white font-extrabold text-sm sm:text-base shadow-lg shadow-blue-900/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70 active:scale-98"
-                  >
-                    {isSubmitting ? (
-                      <span className="flex items-center gap-2">
-                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Dispatched to TASEP Desk...
-                      </span>
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4" />
-                        <span>
-                          {formType === 'quote'
-                            ? 'Submit Official Quotation Request'
-                            : formType === 'callback'
-                            ? 'Schedule Corporate Callback'
-                            : 'Send Message to Directorate'}
-                        </span>
-                      </>
-                    )}
-                  </button>
-                  <p className="text-[11px] text-slate-400 text-center mt-2">
-                    Submissions are protected under POPIA and answered within 2 business hours.
-                  </p>
-                </div>
+                {/* Submit button */}
+                <button
+                  type="submit"
+                  className="w-full py-3.5 px-4 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-yellow-500/20 cursor-pointer transition-all"
+                >
+                  <Send className="w-4 h-4 text-slate-950" />
+                  <span>Submit Booking & Request Quotation</span>
+                </button>
               </form>
             )}
           </div>
 
-          {/* Right Column: Direct Office Cards & Information */}
-          <div className="lg:col-span-4 space-y-6">
-            {/* Direct Contact Card */}
-            <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 border border-slate-800 space-y-6">
-              <div className="space-y-1">
-                <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider block">
-                  Official Channels
-                </span>
-                <h3 className="text-xl font-bold font-heading">
-                  TASEP (Pty) Ltd
-                </h3>
-                <p className="text-xs text-slate-300">
-                  A Spirit For Innovation
-                </p>
-              </div>
-
-              <div className="space-y-4 text-xs sm:text-sm">
-                <div className="flex items-start gap-3">
-                  <Phone className="w-4 h-4 text-emerald-400 shrink-0 mt-1" />
-                  <div>
-                    <span className="text-slate-400 block text-[11px]">Primary Line</span>
-                    <a
-                      href={`tel:${COMPANY_INFO.primaryPhone.replace(/\s+/g, '')}`}
-                      className="font-bold text-white hover:text-emerald-400 text-base"
-                    >
-                      {COMPANY_INFO.primaryPhone}
-                    </a>
-                  </div>
+          {/* Right Column: Direct Hotlines & Fast Callback Card */}
+          <div className="lg:col-span-5 space-y-6">
+            {/* Direct Hotlines Card */}
+            <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 border border-yellow-500/40 shadow-xl space-y-5">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-black border border-yellow-400/60 p-1 flex items-center justify-center">
+                  <img src={JPZ_INFO.logo} alt="JPZ Logo" className="w-full h-full object-contain" />
                 </div>
-
-                <div className="flex items-start gap-3">
-                  <MessageCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-1" />
-                  <div>
-                    <span className="text-slate-400 block text-[11px]">Instant Messaging</span>
-                    <a
-                      href={COMPANY_INFO.whatsappUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-semibold text-emerald-300 hover:underline"
-                    >
-                      Direct WhatsApp Desk
-                    </a>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Mail className="w-4 h-4 text-cyan-400 shrink-0 mt-1" />
-                  <div>
-                    <span className="text-slate-400 block text-[11px]">Electronic Mail</span>
-                    <span className="font-semibold text-white">
-                      {COMPANY_INFO.email}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <MapPin className="w-4 h-4 text-cyan-400 shrink-0 mt-1" />
-                  <div>
-                    <span className="text-slate-400 block text-[11px]">Headquarters & Footprint</span>
-                    <span className="font-semibold text-white">
-                      {COMPANY_INFO.headquarters}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3 pt-2 border-t border-slate-800">
-                  <Clock className="w-4 h-4 text-teal-400 shrink-0 mt-1" />
-                  <div>
-                    <span className="text-slate-400 block text-[11px]">Operating Schedule</span>
-                    <span className="text-slate-300 text-xs">
-                      {COMPANY_INFO.businessHours}
-                    </span>
-                  </div>
+                <div>
+                  <h3 className="font-black text-lg text-white">JPZ 24/7 Hotlines</h3>
+                  <p className="text-xs text-yellow-400">Direct Operator On Call</p>
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs text-slate-300">
-                <span className="text-emerald-400 font-bold block mb-1">
-                  24/7 Field Support:
-                </span>
-                {COMPANY_INFO.emergencyLine}
+              <div className="space-y-2.5">
+                <a
+                  href={`tel:${JPZ_INFO.primaryPhoneRaw}`}
+                  className="flex items-center justify-between p-3 rounded-xl bg-slate-800/90 hover:bg-slate-800 border border-slate-700 transition-colors"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Phone className="w-4 h-4 text-yellow-400" />
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Primary Hotline & WhatsApp</span>
+                      <span className="text-sm font-black text-yellow-400">{JPZ_INFO.primaryPhone}</span>
+                    </div>
+                  </div>
+                  <span className="text-xs bg-yellow-400/20 text-yellow-300 px-2 py-0.5 rounded font-bold">Call Now</span>
+                </a>
+
+                <a
+                  href={`tel:${JPZ_INFO.secondaryPhoneRaw}`}
+                  className="flex items-center justify-between p-3 rounded-xl bg-slate-800/90 hover:bg-slate-800 border border-slate-700 transition-colors"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Phone className="w-4 h-4 text-slate-400" />
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Secondary Line</span>
+                      <span className="text-sm font-bold text-white">{JPZ_INFO.secondaryPhone}</span>
+                    </div>
+                  </div>
+                  <span className="text-xs text-slate-400">Direct</span>
+                </a>
+
+                <a
+                  href={`tel:${JPZ_INFO.alternativePhoneRaw}`}
+                  className="flex items-center justify-between p-3 rounded-xl bg-slate-800/90 hover:bg-slate-800 border border-slate-700 transition-colors"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Phone className="w-4 h-4 text-slate-400" />
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Alternative Line</span>
+                      <span className="text-sm font-bold text-white">{JPZ_INFO.alternativePhone}</span>
+                    </div>
+                  </div>
+                  <span className="text-xs text-slate-400">Direct</span>
+                </a>
+
+                <a
+                  href={JPZ_INFO.whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-3 rounded-xl bg-emerald-950/80 hover:bg-emerald-900/80 border border-emerald-500/40 text-emerald-300 transition-colors"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <MessageSquare className="w-4 h-4 text-emerald-400" />
+                    <div>
+                      <span className="text-[10px] text-emerald-400 block">WhatsApp Instant SOS</span>
+                      <span className="text-sm font-bold">Send Live GPS Location</span>
+                    </div>
+                  </div>
+                  <span className="text-xs bg-emerald-500/20 px-2 py-0.5 rounded font-bold">Chat</span>
+                </a>
+
+                <div className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-800/50 text-xs text-slate-300">
+                  <Mail className="w-4 h-4 text-yellow-400 shrink-0" />
+                  <span>{JPZ_INFO.email}</span>
+                </div>
               </div>
             </div>
 
-            {/* Division Quick Summary Card */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-3 shadow-xs">
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                Direct Division Desks
-              </h4>
-              <ul className="space-y-2 text-xs text-slate-700 font-medium">
-                <li className="flex items-center gap-2">
-                  <Pickaxe className="w-3.5 h-3.5 text-blue-600" />
-                  <span>Mining Tenders & Earthmoving Ops</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Building2 className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Property Development & Architecture</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Coins className="w-3.5 h-3.5 text-indigo-600" />
-                  <span>Capital Financing & Joint Ventures</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Sparkles className="w-3.5 h-3.5 text-teal-600" />
-                  <span>Specialized Corporate Cleaning Solutions</span>
-                </li>
-              </ul>
+            {/* Quick 60-Second Callback Form */}
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-lg space-y-4">
+              <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                <Clock className="w-4 h-4 text-yellow-500" />
+                <span>Quick 60-Second Callback</span>
+              </h3>
+              
+              {cbSubmitted ? (
+                <div className="p-3 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 rounded-xl text-xs flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <span>Thank you! An operator will ring you back immediately.</span>
+                </div>
+              ) : (
+                <form onSubmit={handleCallbackSubmit} className="space-y-3">
+                  <input
+                    type="text"
+                    required
+                    value={cbName}
+                    onChange={(e) => setCbName(e.target.value)}
+                    placeholder="Your Name"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
+                  />
+                  <input
+                    type="tel"
+                    required
+                    value={cbPhone}
+                    onChange={(e) => setCbPhone(e.target.value)}
+                    placeholder="Your Phone Number (e.g. 081 079 8244)"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
+                  />
+                  <button
+                    type="submit"
+                    className="w-full py-2.5 rounded-xl bg-slate-900 dark:bg-yellow-400 hover:bg-slate-800 dark:hover:bg-yellow-300 text-white dark:text-slate-950 text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    Request Instant Callback
+                  </button>
+                </form>
+              )}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Frequently Asked Questions Section */}
+      {/* SOWETO & GREATER JOHANNESBURG SERVICE AREA COVERAGE MAP */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-slate-50 rounded-3xl border border-slate-200 p-6 sm:p-10 space-y-6">
-          <div className="space-y-2 text-center max-w-2xl mx-auto mb-8">
-            <span className="text-xs font-bold uppercase tracking-widest text-blue-600 block">
-              Inquiry Assistance
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-heading">
-              Frequently Asked Questions
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600">
-              Clear answers regarding our quotation process, division operations, and partnership structures.
-            </p>
-          </div>
+        <ServiceAreaMap onOpenEmergency={onOpenEmergency} />
+      </section>
 
-          <div className="space-y-3 max-w-3xl mx-auto">
-            {FAQS.map((faq, index) => {
-              const isOpen = openFaqIndex === index;
-              return (
-                <div
-                  key={index}
-                  className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs"
+      {/* FAQ ACCORDION SECTION */}
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center space-y-2 mb-8">
+          <span className="text-xs font-black text-yellow-500 uppercase tracking-widest">
+            Common Inquiries
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
+            Frequently Asked Questions
+          </h2>
+        </div>
+
+        <div className="space-y-3">
+          {FAQS.map((faq, idx) => {
+            const isOpen = openFaqIdx === idx;
+            return (
+              <div
+                key={idx}
+                className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs"
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenFaqIdx(isOpen ? null : idx)}
+                  className="w-full p-4 sm:p-5 text-left font-bold text-sm sm:text-base text-slate-900 dark:text-white flex items-center justify-between gap-4 cursor-pointer"
                 >
-                  <button
-                    type="button"
-                    onClick={() => setOpenFaqIndex(isOpen ? null : index)}
-                    className="w-full p-4 text-left flex items-center justify-between gap-4 font-bold text-xs sm:text-sm text-slate-800 hover:text-blue-600 transition-colors cursor-pointer"
-                  >
-                    <span>{faq.q}</span>
-                    <ChevronDown
-                      className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
-                        isOpen ? 'rotate-180 text-blue-600' : ''
-                      }`}
-                    />
-                  </button>
-                  {isOpen && (
-                    <div className="px-4 pb-4 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
-                      {faq.a}
-                    </div>
+                  <span>{faq.q}</span>
+                  {isOpen ? (
+                    <ChevronUp className="w-5 h-5 text-yellow-500 shrink-0" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5 text-slate-400 shrink-0" />
                   )}
-                </div>
-              );
-            })}
-          </div>
+                </button>
+                {isOpen && (
+                  <div className="px-5 pb-5 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-slate-800/80 pt-3">
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </section>
     </div>

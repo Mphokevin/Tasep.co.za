@@ -268,7 +268,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenFlyer })
               className="px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm transition-colors flex items-center gap-2"
             >
               <Phone className="w-4 h-4 text-emerald-600" />
-              <span>Direct: 079 751 9840</span>
+              <span>Main Alert: {COMPANY_INFO.primaryPhone}</span>
             </a>
           </div>
         </div>

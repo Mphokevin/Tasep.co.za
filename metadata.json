@@ -1,6 +1,6 @@
 {
-  "name": "TASEP PTY LTD - A Spirit For Innovation",
-  "description": "Official responsive corporate web application for TASEP PTY LTD. Building today for a better tomorrow across Mining Projects, Property Development, Financing, and Specialized Corporate Cleaning Solutions.",
-  "requestFramePermissions": [],
+  "name": "JPZ Towing Services - Soweto 24/7 Roadside & Accident Recovery",
+  "description": "Fast 24/7 emergency towing, accident recovery, flatbed rollback, tyre change, and jumpstart services in Soweto and greater Johannesburg.",
+  "requestFramePermissions": ["geolocation"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
